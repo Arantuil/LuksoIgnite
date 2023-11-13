@@ -1,0 +1,10 @@
+{
+  "CONTRACT_ADDRESS": "0x9EDA0F4557bF34b72021C4f0F6A876D223517B4e",
+  "NETWORK": {
+    "NAME": "Testnet",
+    "SYMBOL": "LYXt",
+    "ID": 4201
+  },
+  "GAS_LIMIT": 300000
+}
+

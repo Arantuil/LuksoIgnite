@@ -1,0 +1,44 @@
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="19"
+      height="18"
+      fill="none"
+      version="1.1"
+      viewBox="0 0 19 18"
+    >
+      <g>
+        <path
+          stroke="#fff"
+          d="M16.97 16.5l-3.75-3.75m1.875-4.688a6.563 6.563 0 11-13.125 0 6.563 6.563 0 0113.125 0z"
+        ></path>
+      </g>
+      <defs>
+        <clipPath>
+          <path fill="#fff" d="M0 0h18v18H0z" transform="translate(.47)"></path>
+        </clipPath>
+      </defs>
+      <g
+        fill="none"
+        stroke="#fff"
+        strokeDasharray="none"
+        strokeMiterlimit="4"
+        strokeOpacity="1"
+        display="inline"
+      >
+        <ellipse
+          cx="8.531"
+          cy="8.063"
+          strokeLinecap="round"
+          strokeLinejoin="bevel"
+          strokeWidth="1.62"
+          rx="6.44"
+          ry="6.44"
+        ></ellipse>
+        <path
+          strokeLinecap="butt"
+          strokeLinejoin="miter"
+          strokeWidth="1.5"
+          d="M13.22 12.75l3.75 3.75"
+        ></path>
+      </g>
+    </svg>
