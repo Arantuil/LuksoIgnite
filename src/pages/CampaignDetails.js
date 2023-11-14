@@ -301,7 +301,7 @@ const CampaignDetails = () => {
                                 <h4 className="font-semibold text-[18px] text-secondary uppercase">
                                     Creator
                                 </h4>
-                                <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
+                                <div className="mt-[10px] flex flex-row items-center flex-wrap gap-[14px]">
                                     <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full">
                                         <AccountIcon size={32} address={sortedCampaigns.owner} />
                                     </div>
@@ -317,7 +317,7 @@ const CampaignDetails = () => {
                                 <h2 className="font-semibold text-[18px] text-secondary uppercase">
                                     Title
                                 </h2>
-                                <div className="mt-[20px]">
+                                <div className="mt-[10px]">
                                     <p className="font-normal text-[16px] text-[#808191] leading-[26px] text-justify">
                                         {sortedCampaigns.title}
                                     </p>
@@ -329,7 +329,7 @@ const CampaignDetails = () => {
                                     Description
                                 </h4>
 
-                                <div className="mt-[20px] ">
+                                <div className="mt-[10px] ">
                                     <p className="font-normal flex flex-col text-justify">
                                         {campaignDescription.map((line, index) => (
                                             line[0] === '#' || line[1] === '#' || line[2] === '#' ? (
@@ -358,7 +358,7 @@ const CampaignDetails = () => {
                                 </h4>
                                 )}
 
-                                <div className="mt-[20px]">
+                                <div className="mt-[10px]">
                                     <p className="font-normal text-[16px] text-[#808191] leading-[26px] text-justify">
                                         {userContributionTotal === 0 ? 0: Math.round(userContributionTotal / 1e18 * 1000) / 1000} LYX ({Math.round(((weiToEther(String(userContributionTotal))/weiToEther(String(sortedCampaigns.target)))*100)* 100) / 100}% of the target)
                                     </p>
@@ -386,19 +386,19 @@ const CampaignDetails = () => {
                                         Contributors
                                     </h4>
                                 )}
-                                <div className="mt-[20px] sm:mt-[30px] md:mt-[40px] flex flex-col gap-4">
+                                <div className="mt-[10px] sm:mt-[15px] md:mt-[20px] flex flex-col gap-4">
                                     {contributorEntries.length > 0 && contributorEntries.length !== 0 ? (
                                         showingAllEntries === false ? (
                                             contributorEntries.slice(0, 3).map((funder) => (
                                                 <div className="flex justify-between items-center gap-4">
                                                     <AccountIcon size={22} address={funder[0]} />
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="block md:hidden hover:text-[#8C6DFD] font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="block md:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
                                                         {truncateAddress(funder[0], 5)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden md:block xl:hidden hover:text-[#8C6DFD] font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden md:block xl:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
                                                         {truncateAddress(funder[0], 10)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden xl:block hover:text-[#8C6DFD] font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden xl:block hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
                                                         {funder[0]}
                                                     </a>
                                                     <p className="font-normal text-[16px] text-[#808191] leading-[26px] break-all">
@@ -410,13 +410,13 @@ const CampaignDetails = () => {
                                             contributorEntries.map((funder) => (
                                                 <div className="flex justify-between items-center gap-4">
                                                     <AccountIcon size={22} address={funder[0]} />
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="block md:hidden hover:text-[#8C6DFD] font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="block md:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
                                                         {truncateAddress(funder[0], 5)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden md:block xl:hidden hover:text-[#8C6DFD] font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden md:block xl:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
                                                         {truncateAddress(funder[0], 10)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden xl:block hover:text-[#8C6DFD] font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden xl:block hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
                                                         {funder[0]}
                                                     </a>
                                                     <p className="font-normal text-[16px] text-[#808191] leading-[26px] break-all">
@@ -578,7 +578,7 @@ const CampaignDetails = () => {
                                         <h4 className="font-semibold text-[14px] leading-[22px] text-secondary">
                                             Back it just because you believe in it.
                                         </h4>
-                                        <p className="mt-[20px] font-normal leading-[22px] text-[#808191]">
+                                        <p className="mt-[10px] font-normal leading-[22px] text-[#808191]">
                                             Support the project for no reward, unless the campaign specifically says there will be a reward for all the contributors if the target gets reached.
                                         </p>
                                     </div>
