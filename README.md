@@ -11,5 +11,5 @@ Link to the LuksoIgniteV1 contract deployed on the testnet:
 - https://explorer.execution.testnet.lukso.network/address/0x9EDA0F4557bF34b72021C4f0F6A876D223517B4e
 
 The LuksoIgnite Telegram channel is currently used for sharing any actions performed on the platform, this includes: 'Campaign creations', 'Added contributions', 'Contributions taken back'.
-- Telegram channel: https://t.me/+qKHe7YOOdcRkOGE0
+- Telegram channel: https://t.me/luksoignite
 - Notifications channel: https://t.me/luksoigniteUpdates

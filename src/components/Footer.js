@@ -15,7 +15,7 @@ const Footer = () => {
                     </a>
                 </div>
                 <div className='hover:brightness-110 transition-all hover:shadow-[0_0px_20px_0px] hover:shadow-primary rounded-xl h-full bg-offBlack flex items-center'>
-                    <a className='py-1 px-2 md:px-3 h-full w-full flex items-center' href='https://t.me/+qKHe7YOOdcRkOGE0' target='_blank'>
+                    <a className='py-1 px-2 md:px-3 h-full w-full flex items-center' href='https://t.me/luksoignite' target='_blank'>
                         <svg
                             height={'100%'}
                             fill="#FE005B"
