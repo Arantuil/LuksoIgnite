@@ -8,5 +8,5 @@ A crowdfunding platform based on smart contracts. Do you have an idea you want t
 - Reduced Fees: With no centralized intermediaries, a decentralized crowdfunding platform can have lower fees, reducing the cost of fundraising for project creators. For example: the fees of a popular crowdfunding platform are '5% of total funds raised' and for each contribution a 3% + €0.20 fee. On the LuksoIgnite platform there is only a 5% total funds raised fee to support the development of the platform.
 
 The LuksoIgnite Telegram channel is currently used for sharing any actions performed on the platform, this includes: 'Campaign creations', 'Added contributions', 'Contributions taken back'.
-Telegram channel: https://t.me/+qKHe7YOOdcRkOGE0
-Notifications channel: https://t.me/luksoigniteUpdates
+- Telegram channel: https://t.me/+qKHe7YOOdcRkOGE0
+- Notifications channel: https://t.me/luksoigniteUpdates
