@@ -12,6 +12,9 @@ import Loader from "../components/Loader";
 import { db } from '../firebase';
 import { onValue, ref } from 'firebase/database';
 
+import { ERC725 } from '@erc725/erc725.js';
+import lsp3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
+
 const CampaignDetails = () => {
     const blockchain = useSelector((state) => state.blockchain);
     const dispatch = useDispatch();
@@ -59,6 +62,7 @@ const CampaignDetails = () => {
         });
     }, [id]);
 
+
     const [contributorEntries, setContributorEntries] = useState([]);
     useEffect(() => {
         try {
@@ -69,12 +73,13 @@ const CampaignDetails = () => {
             for (const key in contributionsData) {
                 const contribution = contributionsData[key];
                 const contributor = contribution.contributor;
+                const contributorImg = contribution.contributorImg;
                 const amount = contribution.contribution;
 
-                if (aggregatedContributions[contributor]) {
-                    aggregatedContributions[contributor] += amount;
+                if (aggregatedContributions[contributor.toString()+','+contributorImg.toString()]) {
+                    aggregatedContributions[contributor.toString()+','+contributorImg.toString()] += amount;
                 } else {
-                    aggregatedContributions[contributor] = amount;
+                    aggregatedContributions[contributor.toString()+','+contributorImg.toString()] = amount;
                 }
             }
 
@@ -157,9 +162,10 @@ const CampaignDetails = () => {
     const [userContributionTotal, setUserContributionTotal] = useState(0);
     function getUserContributionTotal() {
         if (userContributionTotal === 0) {
+            console.log(contributorEntries)
             for (let i = 0; i < contributorEntries.length; i++) {
                 try {
-                    if ((contributorEntries[i][0]).toLowerCase() === (blockchain.account).toLowerCase()) {
+                    if ((contributorEntries[i][0].split(',')[0]).toLowerCase() === (blockchain.account).toLowerCase()) {
                         setUserContributionTotal(userContributionTotal+contributorEntries[i][1])
                     }
                 } catch {continue}
@@ -170,13 +176,70 @@ const CampaignDetails = () => {
         getUserContributionTotal();
     }, [contributorEntries, blockchain.account]);
 
+    //
+
+    const [accountInfo, setAccountInfo] = useState(null);
+    async function getProfileData() {
+        if (blockchain.account !== '' && blockchain.account !== null) {
+            try {
+            const erc725js = new ERC725(lsp3ProfileSchema, blockchain.account, 'https://rpc.testnet.lukso.gateway.fm',
+                {
+                    ipfsGateway: 'https://api.universalprofile.cloud/ipfs',
+                },
+            );
+
+            const profileData = await erc725js.getData();
+
+            const accountDetails = "https://universalpage.dev/api/ipfs/" + JSON.stringify(profileData[1]?.value.url).replace(/["']/g, "").replace("ipfs://", "")
+            
+            fetch(accountDetails)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data from the server:", data);
+                    setAccountInfo(data)
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                });
+            } catch {
+                console.log('Error, no user profileImage')
+            }
+        }
+    }
+    
+    useEffect(() => {
+        getProfileData()
+    }, [blockchain.account])
+
+    const [profileImage, setProfileImage] = useState(null);
+    useEffect(() => {
+        if (accountInfo !== null) {
+            try {
+            const ipfsLink = accountInfo.LSP3Profile.profileImage[0].url.replace('ipfs://', '')
+            const gateway = 'https://ipfs.io/ipfs/';
+            const imageUrl = `${gateway}${ipfsLink}`;
+            setProfileImage(imageUrl)
+            } catch {
+                setProfileImage('https://apricot-hard-gamefowl-535.mypinata.cloud/ipfs/QmbyS4DpyPVcVn3KerkNZaKkB1exA6Pz6SevtsrLEQkrdg')
+            }
+        }
+    }, [accountInfo])
+
+    //
+
     const [isloading, setIsLoading] = useState(false);
     const handleDonate = () => {
         setContributionInProcess(true);
         setIsLoading(true)
         blockchain.smartContract.methods
             .contributeToCampaign(
-                id
+                id,
+                profileImage
             )
             .send({
                 gasPrice: 100000000,
@@ -262,6 +325,61 @@ const CampaignDetails = () => {
         }
     }, [sortedCampaigns])
 
+
+    //
+
+    const [campaignOwnerInfo, setCampaignOwnerInfo] = useState(null);
+    async function getCampaignOwnerProfileData() {
+        if (sortedCampaigns.owner !== '' && sortedCampaigns.owner !== null) {
+            try {
+            const erc725js = new ERC725(lsp3ProfileSchema, sortedCampaigns.owner, 'https://rpc.testnet.lukso.gateway.fm',
+                {
+                    ipfsGateway: 'https://api.universalprofile.cloud/ipfs',
+                },
+            );
+
+            const profileData = await erc725js.getData();
+
+            const accountDetails = "https://universalpage.dev/api/ipfs/" + JSON.stringify(profileData[1]?.value.url).replace(/["']/g, "").replace("ipfs://", "")
+            
+            fetch(accountDetails)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data from the server:", data);
+                    setCampaignOwnerInfo(data)
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                });
+            } catch {
+                console.log('Error, no user profileImage')
+            }
+        }
+    }
+    
+    useEffect(() => {
+        getCampaignOwnerProfileData()
+    }, [sortedCampaigns])
+
+    const [campaignOwnerImage, setCampaignOwnerImage] = useState(null);
+    useEffect(() => {
+        if (campaignOwnerInfo !== null) {
+            try {
+            const ipfsLink = campaignOwnerInfo.LSP3Profile.profileImage[0].url.replace('ipfs://', '')
+            const gateway = 'https://ipfs.io/ipfs/';
+            const imageUrl = `${gateway}${ipfsLink}`;
+            setCampaignOwnerImage(imageUrl)
+            } catch {
+                setCampaignOwnerImage('https://apricot-hard-gamefowl-535.mypinata.cloud/ipfs/QmbyS4DpyPVcVn3KerkNZaKkB1exA6Pz6SevtsrLEQkrdg')
+            }
+        }
+    }, [campaignOwnerInfo])
+
     return (
         <div className="p-2 sm:p-4 md:p-6 lg:p-8 lg:px-20
         xs:ml-[10px] ml-[16px] sm:ml-[20px] 3xs:w-[calc(100%-50px-10px)] 2xs:w-[calc(100%-60px-10px)] xs:w-[calc(100%-70px-10px)] w-[calc(100%-80px-16px)] sm:w-[calc(100%-80px-20px)] 
@@ -303,7 +421,9 @@ const CampaignDetails = () => {
                                 </h4>
                                 <div className="mt-[10px] flex flex-row items-center flex-wrap gap-[14px]">
                                     <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full">
-                                        <AccountIcon size={32} address={sortedCampaigns.owner} />
+                                        {campaignOwnerImage !== null && (
+                                            <img className='w-[32px] rounded-full' src={campaignOwnerImage} />
+                                        )}
                                     </div>
                                     <div>
                                         <h4 className="font-semibold text-[14px] text-secondary break-all">
@@ -348,7 +468,7 @@ const CampaignDetails = () => {
 
                             {blockchain.account !== null && blockchain.account !== '' ? (
                             <div>
-                                {sortedCampaigns.amountContributed !== undefined && parseFloat(weiToEther(String(sortedCampaigns.amountContributed))) < parseFloat(weiToEther(String(sortedCampaigns.target))) && sortedCampaigns.campaignAmountWithdrawn === false ? (
+                                {sortedCampaigns.amountContributed !== undefined && parseFloat(weiToEther(String(sortedCampaigns.amountContributed))) < parseFloat(weiToEther(String(sortedCampaigns.target))) && sortedCampaigns.campaignAmountWithdrawn === true ? (
                                 <h4 className="font-semibold text-[18px] text-secondary uppercase">
                                     Your total contribution (returned)
                                 </h4>
@@ -387,19 +507,19 @@ const CampaignDetails = () => {
                                     </h4>
                                 )}
                                 <div className="mt-[10px] sm:mt-[15px] md:mt-[20px] flex flex-col gap-4">
-                                    {contributorEntries.length > 0 && contributorEntries.length !== 0 ? (
+                                    {contributorEntries.length > 0 ? (
                                         showingAllEntries === false ? (
                                             contributorEntries.slice(0, 3).map((funder) => (
                                                 <div className="flex justify-between items-center gap-4">
-                                                    <AccountIcon size={22} address={funder[0]} />
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="block md:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
-                                                        {truncateAddress(funder[0], 5)}
+                                                    <img className='w-[22px] rounded-full' src={funder[0].split(',')[1]} />
+                                                    <a target='_blank' rel='noreferrer' href={`https://wallet.universalprofile.cloud/${funder[0].split(',')[0]}`} className="block md:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                        {truncateAddress(funder[0].split(',')[0], 5)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden md:block xl:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
-                                                        {truncateAddress(funder[0], 10)}
+                                                    <a target='_blank' rel='noreferrer' href={`https://wallet.universalprofile.cloud/${funder[0].split(',')[0]}`} className="hidden md:block xl:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                        {truncateAddress(funder[0].split(',')[0], 10)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden xl:block hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
-                                                        {funder[0]}
+                                                    <a target='_blank' rel='noreferrer' href={`https://wallet.universalprofile.cloud/${funder[0].split(',')[0]}`} className="hidden xl:block hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                        {funder[0].split(',')[0]}
                                                     </a>
                                                     <p className="font-normal text-[16px] text-[#808191] leading-[26px] break-all">
                                                         {funder[1] / 1e18} LYX
@@ -409,15 +529,15 @@ const CampaignDetails = () => {
                                         ) : (
                                             contributorEntries.map((funder) => (
                                                 <div className="flex justify-between items-center gap-4">
-                                                    <AccountIcon size={22} address={funder[0]} />
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="block md:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
-                                                        {truncateAddress(funder[0], 5)}
+                                                    <img className='w-[22px] rounded-full' src={funder[0].split(',')[1]} />
+                                                    <a target='_blank' rel='noreferrer' href={`https://wallet.universalprofile.cloud/${funder[0].split(',')[0]}`} className="block md:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                        {truncateAddress(funder[0].split(',')[0], 5)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden md:block xl:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
-                                                        {truncateAddress(funder[0], 10)}
+                                                    <a target='_blank' rel='noreferrer' href={`https://wallet.universalprofile.cloud/${funder[0].split(',')[0]}`} className="hidden md:block xl:hidden hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                        {truncateAddress(funder[0].split(',')[0], 10)}
                                                     </a>
-                                                    <a target='_blank' rel='noreferrer' href={`https://explorer.energyweb.org/address/${funder[0]}`} className="hidden xl:block hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
-                                                        {funder[0]}
+                                                    <a target='_blank' rel='noreferrer' href={`https://wallet.universalprofile.cloud/${funder[0].split(',')[0]}`} className="hidden xl:block hover:text-primary font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                                                        {funder[0].split(',')[0]}
                                                     </a>
                                                     <p className="font-normal text-[16px] text-[#808191] leading-[26px] break-all">
                                                         {funder[1] / 1e18} LYX
@@ -464,23 +584,37 @@ const CampaignDetails = () => {
                                         ) : (
                                             currentTimestamp > sortedCampaigns.deadline ? (
                                                 parseFloat(weiToEther(String(sortedCampaigns.amountContributed))) < parseFloat(weiToEther(String(sortedCampaigns.target))) && sortedCampaigns.campaignAmountWithdrawn === false ? (
-                                                    <div className="absolute rounded-xl top-[-7.5%] left-[-7.5%] w-[115%] h-[115%] z-1 bg-[rgba(140,109,253,0.15)]">
+                                                    blockchain.account !== null ? (
+                                                    <div className="absolute rounded-xl top-[-7.5%] left-[-7.5%] w-[115%] h-[115%] z-1 bg-[rgba(211,0,77,0.25)]">
                                                         <CustomButton
                                                         btnType="button"
                                                         disabled={returnContributionsInProcess}
                                                         title={`${returnContributionsInProcess ? "Returning contributions..." : "Return contributions"}`}
-                                                        styles={`${returnContributionsInProcess ? "bg-[rgba(74,205,141,0.5)]" : "bg-[#4ACD8D]"} font-medium absolute p-2 rounded-xl text-secondary top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 whitespace-nowrap`}
+                                                        styles={`${returnContributionsInProcess ? "bg-midGrey" : "bg-primary"} font-medium absolute p-2 rounded-xl text-secondary top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 whitespace-nowrap`}
                                                         handleClick={handleReturnContributions}
                                                     />
                                                     </div>
+                                                    ) : (
+                                                        <div className="absolute rounded-xl top-[-7.5%] left-[-7.5%] w-[115%] h-[115%] z-1 bg-[rgba(211,0,77,0.25)]">
+                                                        <CustomButton
+                                                        btnType="button"
+                                                        disabled={false}
+                                                        title={`Connect`}
+                                                        styles={`hover:brightness-110 bg-primary font-medium absolute p-2 rounded-xl text-secondary top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 whitespace-nowrap`}
+                                                        handleClick={() => {
+                                                            dispatch(connect());
+                                                        }}
+                                                    />
+                                                    </div>
+                                                    )
                                                 ) : (
                                                     sortedCampaigns.amountContributed !== undefined &&
                                                     parseFloat(weiToEther(String(sortedCampaigns.amountContributed))) < parseFloat(weiToEther(String(sortedCampaigns.target))) && sortedCampaigns.campaignAmountWithdrawn === true ? (
-                                                        <div className="absolute rounded-xl top-[-7.5%] left-[-7.5%] w-[115%] h-[115%] z-1 bg-[rgba(140,109,253,0.15)]">
+                                                        <div className="absolute rounded-xl top-[-7.5%] left-[-7.5%] w-[115%] h-[115%] z-1 bg-[rgba(211,0,77,0.25)]">
                                                             <p className="text-center font-medium absolute p-2 rounded-xl bg-[rgba(0,0,0,0.5)] text-secondary top-[25%] left-[25%] transform -translate-x-[15%] -translate-y-[0%] whitespace-break-spaces">Campaign ended, all contributions have been returned</p>
                                                         </div>
                                                     ) : (
-                                                        <div className="absolute rounded-xl top-[-7.5%] left-[-7.5%] w-[115%] h-[115%] z-1 bg-[rgba(140,109,253,0.15)]">
+                                                        <div className="absolute rounded-xl top-[-7.5%] left-[-7.5%] w-[115%] h-[115%] z-1 bg-[rgba(211,0,77,0.25)]">
                                                             <p className="font-medium absolute p-2 rounded-xl bg-[rgba(0,0,0,0.5)] text-secondary top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">Campaign ended</p>
                                                         </div>
                                                     )
@@ -529,7 +663,7 @@ const CampaignDetails = () => {
                                                     <CustomButton
                                                         btnType="button"
                                                         title="Connect"
-                                                        styles="w-full bg-[#8C6DFD] h-[60px] mt-[20px]"
+                                                        styles="w-full bg-primary h-[60px] mt-[20px]"
                                                         handleClick={() => {
                                                             dispatch(connect());
                                                         }}

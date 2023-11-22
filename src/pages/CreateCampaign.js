@@ -6,6 +6,7 @@ import Loader from "../components/Loader";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactCanvasConfetti from 'react-canvas-confetti';
 import { etherToWei } from '../utils/index';
+import { profile } from '../assets/index'
 
 import { connect } from '../redux/blockchain/blockchainActions';
 import { useSelector, useDispatch } from 'react-redux';
@@ -107,57 +108,6 @@ const CreateCampaign = () => {
         });
     }, [makeShot]);
 
-    const [creatingCampaign, setCreatingCampaign] = useState(false);
-    const [errorHappend, setErrorhappend] = useState(false)
-    const createCampaign = (e) => {
-        if (form.name !== '' && 
-            form.title !== '' &&
-            form.description !== '' &&
-            form.target !== '' && 
-            form.deadline !== 'T0'
-        ) {
-        e.preventDefault();
-        setCreatingCampaign(true);
-        setIsloading(true)
-        
-        blockchain.smartContract.methods
-            .createCampaign(
-                blockchain.account,
-                form.name,
-                form.title,
-                form.description,
-                etherToWei(form.target),
-                convertToUnixTimestamp(form.deadline),
-                form.image
-            )
-            .send({
-                gasPrice: 100000000,
-                to: CONFIG.CONTRACT_ADDRESS,
-                from: blockchain.account,
-                value: 0,
-            })
-            .then((receipt) => {
-                console.log(receipt)
-                fire()
-                setTimeout(function () {
-                    navigate("/")
-                }, 5000);
-                setCreatingCampaign(false);
-                setIsloading(false)
-            })
-            .catch((error) => {
-                console.error(error);
-                setCreatingCampaign(false);
-                setIsloading(false)
-            });
-        } else {
-            setErrorhappend(true);
-            setTimeout(function () {
-                setErrorhappend(false);
-            }, 10000);
-        }
-    };
-
     const [datePart, setDatePart] = useState('');
     const [timePart, setTimePart] = useState('0');
 
@@ -216,6 +166,74 @@ const CreateCampaign = () => {
         console.log(form)
     }, [form])
 
+    const [profileImage, setProfileImage] = useState(null);
+    useEffect(() => {
+        if (accountInfo !== null) {
+            const ipfsLink = accountInfo.LSP3Profile.profileImage[0].url.replace('ipfs://', '')
+            const gateway = 'https://ipfs.io/ipfs/';
+            const imageUrl = `${gateway}${ipfsLink}`;
+            setProfileImage(imageUrl)
+        }
+    }, [accountInfo])
+
+    const [creatingCampaign, setCreatingCampaign] = useState(false);
+    const [errorHappend, setErrorhappend] = useState(false)
+    const createCampaign = (e) => {
+        if (form.name !== '' && 
+            form.title !== '' &&
+            form.description !== '' &&
+            form.target !== '' && 
+            form.deadline !== 'T0'
+        ) {
+        
+        let profileImgLink = 'https://apricot-hard-gamefowl-535.mypinata.cloud/ipfs/QmbyS4DpyPVcVn3KerkNZaKkB1exA6Pz6SevtsrLEQkrdg'
+        if (profileImage !== null) {
+            profileImgLink = profileImage;
+        }
+
+        e.preventDefault();
+        setCreatingCampaign(true);
+        setIsloading(true)
+        
+        blockchain.smartContract.methods
+            .createCampaign(
+                blockchain.account,
+                profileImgLink,
+                form.name,
+                form.title,
+                form.description,
+                etherToWei(form.target),
+                convertToUnixTimestamp(form.deadline),
+                form.image
+            )
+            .send({
+                gasPrice: 100000000,
+                to: CONFIG.CONTRACT_ADDRESS,
+                from: blockchain.account,
+                value: 0,
+            })
+            .then((receipt) => {
+                console.log(receipt)
+                fire()
+                setTimeout(function () {
+                    navigate("/")
+                }, 5000);
+                setCreatingCampaign(false);
+                setIsloading(false)
+            })
+            .catch((error) => {
+                console.error(error);
+                setCreatingCampaign(false);
+                setIsloading(false)
+            });
+        } else {
+            setErrorhappend(true);
+            setTimeout(function () {
+                setErrorhappend(false);
+            }, 10000);
+        }
+    };
+
     return (
         <div className="p-2 sm:p-4 md:p-6 lg:p-8 lg:px-20 xl:px-44 2xl:px-72 
         xs:ml-[10px] ml-[16px] sm:ml-[20px] 3xs:w-[calc(100%-50px-10px)] 2xs:w-[calc(100%-60px-10px)] xs:w-[calc(100%-70px-10px)] w-[calc(100%-80px-16px)] sm:w-[calc(100%-80px-20px)] 
@@ -244,14 +262,27 @@ const CreateCampaign = () => {
                                 styles={'text-secondary'}
                             />
                             ) : (
-                            <FormField
-                                disabled={false}
-                                labelName="Your universal profile name *"
-                                placeholder="Username"
-                                inputType="text"
-                                value={accountInfo.LSP3Profile.name}
-                                styles={'text-secondary'}
-                            />
+                                <div className='flex flex-row w-full'>
+                                    <div className='w-[86%] mr-[4%]'>
+                                    <FormField
+                                        disabled={false}
+                                        labelName="Your universal profile name *"
+                                        placeholder="Username"
+                                        inputType="text"
+                                        value={accountInfo.LSP3Profile.name}
+                                        styles={'text-secondary'}
+                                    />
+                                    </div>
+                                    {profileImage !== null ? (
+                                        <div className='flex items-center w-[10%]'>
+                                            <img className='rounded-full translate-y-[11px]' src={profileImage} alt="" />
+                                        </div>
+                                    ) : (
+                                        <div className='flex items-center w-[10%]'>
+                                            <img className='rounded-full translate-y-[11px]' src={profile} alt="" />
+                                        </div>
+                                    )}
+                            </div>
                             )}
                             <FormField
                                 disabled={false}
@@ -280,7 +311,7 @@ const CreateCampaign = () => {
                                 className="w-[40px] h-[40px] object-contain"
                             />
                             <h4 className="font-bold text-[18px] sm:text-[22px] text-secondary ml-[20px]">
-                                You will get 95% of the final raised amount
+                                You will get 97.5% of the final raised amount
                             </h4>
                         </div>
                         <div className="flex flex-wrap gap-[40px]">
@@ -333,7 +364,7 @@ const CreateCampaign = () => {
                                 btnType="submit"
                                 disabled
                                 title={creatingCampaign ? "Campaign being created..." : "Start new campaign"}
-                                styles={`bg-reverse h-[50px] ${creatingCampaign ? "grayscale" : ""}`}
+                                styles={`bg-primary h-[50px] ${creatingCampaign ? "grayscale" : ""}`}
                                 handleClick={createCampaign}
                             />
                         </div>

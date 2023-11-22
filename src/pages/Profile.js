@@ -7,11 +7,11 @@ import CustomButton from '../components/CustomButton';
 import { db } from '../firebase';
 import { onValue, ref } from 'firebase/database';
 
-import AccountIcon from '../components/AccountIcon';
 import { ERC725 } from '@erc725/erc725.js';
 import lsp3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import { profile, profileGray } from '../assets/index'
 import upLogoColored from '../assets/upLogoColored.png'
+
 
 const Profile = () => {
     const dispatch = useDispatch();
@@ -73,6 +73,26 @@ const Profile = () => {
         getProfileData()
     }, [blockchain.account])
 
+    const [profileImage, setProfileImage] = useState(null);
+    const [profileBanner, setProfileBanner] = useState(null);
+    useEffect(() => {
+        if (accountInfo !== null && accountInfo.LSP3Profile.profileImage[0] !== undefined) {
+            const ipfsLink = accountInfo.LSP3Profile.profileImage[0].url.replace('ipfs://', '')
+            const gateway = 'https://ipfs.io/ipfs/';
+            const imageUrl = `${gateway}${ipfsLink}`;
+            setProfileImage(imageUrl)
+        }
+        if (accountInfo !== null && accountInfo.LSP3Profile.backgroundImage[0] !== undefined) {
+            const ipfsLinkBI = accountInfo.LSP3Profile.backgroundImage[0].url.replace('ipfs://', '')
+            const gatewayBI = 'https://ipfs.io/ipfs/';
+            const imageUrlBI = `${gatewayBI}${ipfsLinkBI}`;
+            setProfileBanner(imageUrlBI)
+        }
+        console.log(profileImage)
+        console.log(profileBanner)
+    }, [accountInfo])
+
+
     return (
         <div className='p-2 sm:p-4 md:p-6 lg:p-8 
         xs:ml-[10px] ml-[16px] sm:ml-[20px] 3xs:w-[calc(100%-50px-10px)] 2xs:w-[calc(100%-60px-10px)] xs:w-[calc(100%-70px-10px)] w-[calc(100%-80px-16px)] sm:w-[calc(100%-80px-20px)] 
@@ -84,36 +104,57 @@ const Profile = () => {
                             Your profile
                         </h1>
                     </div>
-                    <div className='mx-auto mt-6 sm:mt-8 bg-offBlackDarker flex flex-col w-fit h-fit p-4 md:p-6 lg:p-8 rounded-xl'>
-                                <a target='_blank' href={`https://wallet.universalprofile.cloud/${blockchain.account}`}>
-                                    <img className='absolute w-[20px] h-[20px] ml-auto mr-0' src={upLogoColored} />
-                                </a>
-                                <div className='flex justify-center'>
-                                    <a target='_blank' href={`https://wallet.universalprofile.cloud/${blockchain.account}`}>
-                                        <div className='p-2 w-[72px] h-[72px] border-[3px] border-primary rounded-full'>
-                                            <AccountIcon size={48} address={blockchain.account} />
-                                        </div>
+                    <div style={profileBanner !== null ? { 
+                            backgroundImage: `url(${profileBanner})`, 
+                            backgroundSize: 'cover', 
+                            backgroundPosition: 'center', 
+                            width: 'fit-content'
+                        } : {}}  
+                        className={`bg-offBlackDarker mx-auto mt-6 sm:mt-8 flex flex-col w-fit h-fit p-4 md:p-6 lg:p-8 rounded-xl`}>
+                            
+                                <div className='bg-[rgba(0,0,0,0.5)] p-2 md:p-3 lg:p-4 rounded-lg'>
+                                    <a target='_blank' rel='noreferrer' href={`https://wallet.universalprofile.cloud/${blockchain.account}`}>
+                                        <img className='absolute w-[20px] h-[20px] ml-auto mr-0' src={upLogoColored} alt='Universal Profiles' />
                                     </a>
-                                </div>
-                                <div className='mt-4 text-secondary text-xl md:text-2xl text-center'>
-                                    {accountInfo !== null ? (
-                                        <p>Your username: <span className='font-semibold'>{accountInfo.LSP3Profile.name}</span></p>
-                                    ) : (
-                                        <p>Connect to see profile name</p>
-                                    )}
-                                </div>
-                                <div className='text-secondary text-xl md:text-2xl text-center'>
-                                    {accountInfo !== null ? (
-                                        accountInfo.LSP3Profile.description == "" ? (
-                                            <p className='text-midGrey'>No description</p>
+                                    <div className='flex justify-center'>
+                                        {profileImage !== null ? (
+                                            <img className='rounded-full w-[80px]' src={profileImage} alt="" />
                                         ) : (
-                                            <p>Your profile description: <span className='font-semibold'>{accountInfo.LSP3Profile.description}</span></p>
-                                        )
-                                    ) : (
-                                        <p>Connect to see profile description</p>
-                                    )}
+                                            <img className='rounded-full w-[80px]' src={profile} alt="" />
+                                        )}
+                                    </div>
+
+                                    <div className='mt-2 flex mx-auto text-secondary text-sm md:text-base text-center'>
+                                        {accountInfo !== null && accountInfo.LSP3Profile.tags.length !== null ? (
+                                            <p className='flex gap-2 mx-auto'>{accountInfo.LSP3Profile.tags.map((tag) => (
+                                                    <span className='font-semibold bg-[rgba(255,255,255,0.4)] rounded-full py-[1px] md:py-[2px] px-1 md:px-2'>{tag}</span>
+                                                ))}
+                                            </p>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+
+                                    <div className='mt-4 text-secondary text-xl md:text-2xl text-center'>
+                                        {accountInfo !== null ? (
+                                            <p>Your username: <span className='font-semibold'>{accountInfo.LSP3Profile.name}</span></p>
+                                        ) : (
+                                            <p>Connect to see profile name</p>
+                                        )}
+                                    </div>
+                                    <div className='text-secondary text-xl md:text-2xl text-center'>
+                                        {accountInfo !== null ? (
+                                            accountInfo.LSP3Profile.description === "" ? (
+                                                <p className='text-midGrey'>No description</p>
+                                            ) : (
+                                                <p>Your profile description: <span className='font-semibold'>{accountInfo.LSP3Profile.description}</span></p>
+                                            )
+                                        ) : (
+                                            <p>Connect to see profile description</p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                    </div>
                     {filteredCampaigns.length > 0 ? (
                     <div className='mt-[20px] flex justify-center content-start flex-row flex-wrap'>
                         {filteredCampaigns.map((cardInfo) => (
@@ -135,33 +176,6 @@ const Profile = () => {
                     </div>
                     ) : (
                         <div>
-                            <div className='mx-auto mt-6 sm:mt-8 bg-offBlackDarker flex flex-col w-fit h-fit p-4 md:p-6 lg:p-8 rounded-xl'>
-                                <img className='absolute w-[20px] h-[20px] ml-auto mr-0' src={upLogoColored} />
-                                <div className='flex justify-center'>
-                                    <div className='p-2 w-[72px] h-[72px] border-[3px] border-primary rounded-full'>
-                                        <img className='w-full h-full' src={profile} alt="" />
-                                    </div>
-                                </div>
-                                <div className='mt-4 text-secondary text-xl md:text-2xl text-center'>
-                                    {accountInfo !== null ? (
-                                        <p>Your username: <span className='font-semibold'>{accountInfo.LSP3Profile.name}</span></p>
-                                    ) : (
-                                        <p>Connect to see profile name</p>
-                                    )}
-                                </div>
-                                <div className='text-secondary text-xl md:text-2xl text-center'>
-                                    {accountInfo !== null ? (
-                                        accountInfo.LSP3Profile.description == "" ? (
-                                            <p className='text-midGrey'>No description</p>
-                                        ) : (
-                                            <p>Your profile description: <span className='font-semibold'>{accountInfo.LSP3Profile.description}</span></p>
-                                        )
-                                    ) : (
-                                        <p>Connect to see profile description</p>
-                                    )}
-                                </div>
-                            </div>
-
                             <div className="mb-4 sm:mb-8 md:mb-12 mt-6 sm:mt-8">
                                 <h1 className="text-center font-medium text-midGrey text-[20px]">
                                     You have not created any campaigns yet
@@ -191,30 +205,17 @@ const Profile = () => {
                             </p>
                         </div>
                     ) : null}
+
                     <div className='mx-auto mt-6 sm:mt-8 bg-offBlackDarker flex flex-col w-fit h-fit p-4 md:p-6 lg:p-8 rounded-xl'>
-                                <img className='absolute w-[20px] h-[20px] ml-auto mr-0' src={upLogoColored} />
+                                <img className='absolute w-[20px] h-[20px] ml-auto mr-0' src={upLogoColored} alt='Universal Profiles' />
                                 <div className='flex justify-center'>
-                                    <div className='p-2 w-[72px] h-[72px] border-[3px] border-primary rounded-full'>
-                                        <img className='w-full h-full' src={profileGray} alt="" />
-                                    </div>
+                                    <img className='rounded-full w-[80px]' src={profileGray} alt="" />
                                 </div>
                                 <div className='mt-4 text-secondary text-xl md:text-2xl text-center'>
-                                    {accountInfo !== null ? (
-                                        <p>Your username: <span className='font-semibold'>{accountInfo.LSP3Profile.name}</span></p>
-                                    ) : (
-                                        <p>Connect to see profile name</p>
-                                    )}
+                                    <p>Connect to see profile name</p>
                                 </div>
                                 <div className='text-secondary text-xl md:text-2xl text-center'>
-                                    {accountInfo !== null ? (
-                                        accountInfo.LSP3Profile.description == "" ? (
-                                            <p className='text-midGrey'>No description</p>
-                                        ) : (
-                                            <p>Your profile description: <span className='font-semibold'>{accountInfo.LSP3Profile.description}</span></p>
-                                        )
-                                    ) : (
-                                        <p>Connect to see profile description</p>
-                                    )}
+                                    <p>Connect to see profile description</p>
                                 </div>
                             </div>
                     <div className='flex justify-center'>

@@ -8,9 +8,11 @@ import { search, profileGray, profile } from "../assets";
 import { debounce } from 'lodash';
 import { RxCross2 } from 'react-icons/rx';
 
+import { ERC725 } from '@erc725/erc725.js';
+import lsp3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
+
 import { db } from '../firebase';
 import { onValue, ref } from 'firebase/database';
-//import { Lukso } from '../temp/Connect';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -45,7 +47,6 @@ const Navbar = () => {
     function removeSearchTerm() {
         setSearchTerm('')
     }
-    // ------------------------------------------------
 
     const dispatch = useDispatch();
     const blockchain = useSelector((state) => state.blockchain);
@@ -61,12 +62,51 @@ const Navbar = () => {
         getData();
     }, []);
 
-    //const [userAddress, setUserAddress] = useState(null);
-    //const [isConnected, setIsConnected] = useState(false);
-    //const [connectionData, setConnectionData] = useState({
-    //    isConnected: false,
-    //    userAddress: null,
-    //});
+    // ----------------------
+
+    const [accountInfo, setAccountInfo] = useState(null);
+    async function getProfileData() {
+        if (blockchain.account !== '' && blockchain.account !== null) {
+            const erc725js = new ERC725(lsp3ProfileSchema, blockchain.account, 'https://rpc.testnet.lukso.gateway.fm',
+                {
+                    ipfsGateway: 'https://api.universalprofile.cloud/ipfs',
+                },
+            );
+
+            const profileData = await erc725js.getData();
+
+            const accountDetails = "https://universalpage.dev/api/ipfs/" + JSON.stringify(profileData[1]?.value.url).replace(/["']/g, "").replace("ipfs://", "")
+            
+            fetch(accountDetails)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data from the server:", data);
+                    setAccountInfo(data)
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                });
+        }
+    }
+    
+    useEffect(() => {
+        getProfileData()
+    }, [blockchain.account])
+
+    const [profileImage, setProfileImage] = useState(null);
+    useEffect(() => {
+        if (accountInfo !== null) {
+            const ipfsLink = accountInfo.LSP3Profile.profileImage[0].url.replace('ipfs://', '')
+            const gateway = 'https://ipfs.io/ipfs/';
+            const imageUrl = `${gateway}${ipfsLink}`;
+            setProfileImage(imageUrl)
+        }
+    }, [accountInfo])
 
 
     return (
@@ -135,15 +175,27 @@ const Navbar = () => {
                         </div>
                     </Link>
                 ) : (
+                    profileImage === null ? (
                     <Link className='flex items-center hover:brightness-110' to="/profile">
                         <div className="h-full aspect-square rounded-full bg-offBlack flex justify-center items-center cursor-pointer">
                             <img
                                 src={profile}
                                 alt="user"
-                                className="w-[60%] h-[60%] object-contain"
+                                className="w-[60%] h-[60%] object-contain rounded-full"
                             />
                         </div>
                     </Link>
+                    ) : (
+                    <Link className='flex items-center hover:brightness-110' to="/profile">
+                        <div className="h-full aspect-square rounded-full bg-offBlack flex justify-center items-center cursor-pointer">
+                            <img
+                                src={profileImage}
+                                alt="user"
+                                className="w-[60%] h-[60%] object-contain rounded-full"
+                            />
+                        </div>
+                    </Link>
+                    )
                 )}
             </div>
         </div>
