@@ -43,6 +43,12 @@
 			{
 				"indexed": false,
 				"internalType": "string",
+				"name": "ownerImage",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
 				"name": "username",
 				"type": "string"
 			},
@@ -178,6 +184,11 @@
 				"internalType": "uint256",
 				"name": "_id",
 				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_profileImage",
+				"type": "string"
 			}
 		],
 		"name": "contributeToCampaign",
@@ -199,6 +210,12 @@
 				"internalType": "address",
 				"name": "contributor",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "profileImage",
+				"type": "string"
 			},
 			{
 				"indexed": false,
@@ -241,6 +258,11 @@
 				"internalType": "address",
 				"name": "_owner",
 				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_ownerImage",
+				"type": "string"
 			},
 			{
 				"internalType": "string",
@@ -461,6 +483,11 @@
 			},
 			{
 				"internalType": "string",
+				"name": "ownerImage",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
 				"name": "username",
 				"type": "string"
 			},
@@ -531,6 +558,11 @@
 						"internalType": "address",
 						"name": "owner",
 						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "ownerImage",
+						"type": "string"
 					},
 					{
 						"internalType": "string",
