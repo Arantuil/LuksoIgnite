@@ -2,6 +2,8 @@
 
 A crowdfunding platform based on smart contracts. Do you have an idea you want to gather funding for from the public? You can create your own campaign on LuksoIgnite, if the community likes your idea they can contribute to it.
 
+Demo link: https://hackathons-d3672.web.app/
+
 ## Benefits of using smart-contracts for this include, but are not limited to:
 - Transparency: All transaction data, including contributions and fund release, is transparent and immutable on the blockchain. This ensures trust and accountability in the crowdfunding process.
 - Global Access: A Decentralized crowdfunding platform is accessible to anyone with an internet connection, promoting inclusivity and opening up funding opportunities to a global audience.
